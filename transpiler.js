@@ -66,6 +66,14 @@ function conditionalTranslation(predicate) {
   }
 }
 
+function loadConstantTranslation() {
+  return function(instruction) {
+    return baseTranslation(
+      instruction[1], '', 'c[' + instruction[2] + ']', '', '', ''
+    );
+  }
+}
+
 function unsupportedTranslation() {
   return function(instruction) {
     throw instruction[0] + ' is not supported.';
@@ -92,7 +100,7 @@ translations.seq = conditionalTranslation('==');
 translations.addi = immediateTranslation('+');
 
 translations.lw = unsupportedTranslation();
-translations.ldc = unsupportedTranslation();
+translations.ldc = loadConstantTranslation('ldc');
 translations.nop = ignoredTranslation();
 translations.thread_finished = ignoredTranslation();
 

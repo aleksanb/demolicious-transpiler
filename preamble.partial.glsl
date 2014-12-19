@@ -82,16 +82,6 @@ void main(void)
     r[0] = 0;
     r[1] = ((int(uv.y) * 512 + int(uv.x)) / 0xFFFF);
     r[2] = and(int(uv.y) * 512 + int(uv.x), 0xFFFF);
-    r[3] = 0;
-    r[4] = 0;
-    r[5] = 0;
-    r[6] = 0;
-    r[7] = 0;
-    r[8] = 0;
-    r[9] = 0;
-    r[10] = 0;
-    r[11] = 0;
-    r[12] = 0;
-    r[13] = 0;
-    r[14] = 0;
-    r[15] = int(iGlobalTime * 1000.);
+
+    int c[256];
+    c[0] = int(iGlobalTime * 1000.);
