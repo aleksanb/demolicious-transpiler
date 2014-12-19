@@ -86,13 +86,13 @@
       var transpileDebounce;
       document.querySelector('#asm-code').addEventListener('keyup', function() {
         clearTimeout(transpileDebounce);
-        setTimeout(refreshGlsl, 100);
+        setTimeout(refreshGlsl, 250);
       });
 
       var compileDebounce;
       document.querySelector('#d-code').addEventListener('keyup', function() {
         clearTimeout(compileDebounce);
-        setTimeout(fetchFromHdc, 100);
+        setTimeout(fetchFromHdc, 250);
       });
 
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
