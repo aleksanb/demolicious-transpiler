@@ -6,6 +6,7 @@
     <link rel=stylesheet href=style.css>
   </head> 
   <body>
+    <button id=reset-code>Reset code</button>
     <canvas id=c></canvas>
     <div id=editors>
       <div contentEditable id=d-code class="left edit-area" spellcheck=false></div>
@@ -26,11 +27,15 @@
       req.send();
     }
 
-    var preamble, postamble, exampleAsm, exampleD;
+    var preamble, postamble, exampleAsm, storedProgram;
     ajax("get", "preamble.partial.glsl", false, function () { preamble = this.responseText; });
     ajax("get", "postamble.partial.glsl", false, function () { postamble = this.responseText; });
-    ajax("get", "tunnel.d", false, function () { exampleD = this.responseText; });
-    document.querySelector("#d-code").innerText = exampleD;
+
+    storedProgram = localStorage.getItem("d-code");
+    if (storedProgram == null) {
+      ajax("get", "tunnel.d", false, function () { storedProgram = this.responseText; });
+    }
+    document.querySelector("#d-code").innerText = storedProgram;
 
     function refreshGlsl() {
       compile(
@@ -42,7 +47,13 @@
 
     function fetchFromHdc() {
       var d_code = document.querySelector("#d-code").innerText;
-      var jsonp = document.createElement('script');
+      localStorage.setItem("d-code", d_code);
+
+      var jsonp = document.querySelector("#jsonp");
+      jsonp && jsonp.parentNode.removeChild(jsonp);
+
+      jsonp = document.createElement('script');
+      jsonp.id = "jsonp";
       jsonp.src = 'http://hdc.burkow.no/?program='
         + encodeURIComponent(d_code)
         + '&callback=handleHdc';
@@ -63,6 +74,14 @@
       document.querySelector('#asm-code').spellcheck = false;
       document.querySelector('#asm-code').focus();
       document.querySelector('#asm-code').blur();
+
+      document.querySelector("#reset-code").addEventListener('click', function() {
+        localStorage.removeItem("d-code");
+        ajax("get", "tunnel.d", false, function () {
+          document.querySelector("#d-code").innerText = this.responseText;
+          fetchFromHdc();
+        });
+      });
 
       var transpileDebounce;
       document.querySelector('#asm-code').addEventListener('keyup', function() {
