@@ -55,20 +55,14 @@
       localStorage.setItem("d-code", d_code);
       window.location.hash = window.btoa(d_code);
 
-      var jsonp = document.querySelector("#jsonp");
-      jsonp && jsonp.parentNode.removeChild(jsonp);
-
-      jsonp = document.createElement('script');
-      jsonp.id = "jsonp";
-      jsonp.src = 'http://hdc.burkow.no/?program='
-        + encodeURIComponent(d_code)
-        + '&callback=handleHdc';
-      document.querySelector('body').appendChild(jsonp);
-    }
-
-    function handleHdc(code) {
-      document.querySelector('#asm-code').innerText = code.join("\n");
-      refreshGlsl();
+      var req = new XMLHttpRequest();
+      req.open('post', '/hdc/', true);
+      req.onload = function () {
+        document.querySelector('#asm-code').textContent = this.responseText;
+	refreshGlsl();
+      }
+      req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      req.send('program=' + encodeURIComponent(d_code));
     }
 
     function init() {
