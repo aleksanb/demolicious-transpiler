@@ -31,23 +31,29 @@
     ajax("get", "preamble.partial.glsl", false, function () { preamble = this.responseText; });
     ajax("get", "postamble.partial.glsl", false, function () { postamble = this.responseText; });
 
-    storedProgram = localStorage.getItem("d-code");
-    if (storedProgram == null) {
+    var hashfragments = window.location.toString().split("#");
+    if (hashfragments.length > 1) {
+      storedProgram = window.atob(hashfragments[1]);
+    } else if (localStorage.getItem("d-code")) {
+      storedProgram = localStorage.getItem("d-code");
+    } else {
       ajax("get", "tunnel.d", false, function () { storedProgram = this.responseText; });
     }
-    document.querySelector("#d-code").innerText = storedProgram;
+
+    document.querySelector("#d-code").textContent = storedProgram;
 
     function refreshGlsl() {
       compile(
         transpiler.transpile(
-          document.querySelector('#asm-code').innerText,
+          document.querySelector('#asm-code').textContent,
           preamble,
           postamble));
     }
 
     function fetchFromHdc() {
-      var d_code = document.querySelector("#d-code").innerText;
+      var d_code = document.querySelector("#d-code").textContent;
       localStorage.setItem("d-code", d_code);
+      window.location.hash = window.btoa(d_code);
 
       var jsonp = document.querySelector("#jsonp");
       jsonp && jsonp.parentNode.removeChild(jsonp);
@@ -78,7 +84,7 @@
       document.querySelector("#reset-code").addEventListener('click', function() {
         localStorage.removeItem("d-code");
         ajax("get", "tunnel.d", false, function () {
-          document.querySelector("#d-code").innerText = this.responseText;
+          document.querySelector("#d-code").textContent = this.responseText;
           fetchFromHdc();
         });
       });
@@ -86,13 +92,13 @@
       var transpileDebounce;
       document.querySelector('#asm-code').addEventListener('keyup', function() {
         clearTimeout(transpileDebounce);
-        setTimeout(refreshGlsl, 250);
+        transpileDebounce = setTimeout(refreshGlsl, 250);
       });
 
       var compileDebounce;
       document.querySelector('#d-code').addEventListener('keyup', function() {
         clearTimeout(compileDebounce);
-        setTimeout(fetchFromHdc, 250);
+        compileDebounce = setTimeout(fetchFromHdc, 250);
       });
 
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
@@ -111,7 +117,6 @@
       );
 
       fetchFromHdc();
-      refreshGlsl();
       render();
     }
 
